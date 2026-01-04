@@ -27,7 +27,7 @@ int myStrCmp(const char* str1, const char* str2)
 
 bool isValidQueen(const Queen queens[], int x, int y, int& queenCount, int cols, int rows)
 {
-    if (x<0 || x>cols || y<0 || y>rows)
+    if (x<0 || x>=cols || y<0 || y>=rows)
     {
         return false;
     }
@@ -126,6 +126,10 @@ void back(int& queenCount)
 
 int main()
 {
+    std::cout << "Commands available before the start of a game:" << std::endl;
+    std::cout << "new N M           --->    new game with NxM board" << std::endl;
+    std::cout << "load file.txt     --->    load a game" << std::endl;
+    std::cout << "help              --->    show this menu again" << std::endl;
     Queen queens[MAX_SIZE];   //n-cols
     int cols, rows;           //m-rows
     char command[128];
@@ -138,6 +142,16 @@ int main()
             //int minimal = cols < rows ? cols : rows;
             int queenCount = 0;
             bool cancel = false;
+            std::cout << "Game started!" << std::endl;
+            std::cout << "Commands available during a game:" << std::endl;
+            std::cout << "play x y          --->    place a queen on position (x,y)" << std::endl;
+            std::cout << "show              --->    show the board" << std::endl;
+            std::cout << "free              --->    show free spaces on the board" << std::endl;
+            std::cout << "back              --->    undo last move" << std::endl;
+            std::cout << "turn              --->    show whose turn it is" << std::endl;
+            std::cout << "help              --->    show this menu again" << std::endl;
+            std::cout << "save file.txt     --->    save current game" << std::endl;
+            std::cout << "exit              --->    exit current game without saving" << std::endl;
             while (!isWin(queens, queenCount, cols, rows))
             {
                 std::cin >> command;
@@ -162,6 +176,18 @@ int main()
                     cancel = true;
                     break;
                 }
+                else if (myStrCmp(command, "help") == 0)
+                {
+                    std::cout << "Commands available during a game:" << std::endl;
+                    std::cout << "play x y          --->    place a queen on position (x,y)" << std::endl;
+                    std::cout << "show              --->    show the board" << std::endl;
+                    std::cout << "free              --->    show free spaces on the board" << std::endl;
+                    std::cout << "back              --->    undo last move" << std::endl;
+                    std::cout << "turn              --->    show whose turn it is" << std::endl;
+                    std::cout << "help              --->    show this menu again" << std::endl;
+                    std::cout << "save file.txt     --->    save current game" << std::endl;
+                    std::cout << "exit              --->    exit current game without saving" << std::endl;
+                }
                 else
                 {
                     std::cout << "Invalid command! Try again!" << std::endl;
@@ -178,9 +204,14 @@ int main()
         }
         else if (myStrCmp(command, "exit") == 0)
             break;
+        else if (myStrCmp(command,"help")==0)
+        {
+            std::cout << "Commands before start of game:" << std::endl;
+            std::cout << "new N M           --->    new game with NxM board" << std::endl;
+            std::cout << "load file.txt     --->    load a game" << std::endl;
+            std::cout << "help              --->    show this menu again" << std::endl;
+        }
         else
             std::cout << "Invalid command! Try again!" << std::endl;
     }
-    
-    
 }
