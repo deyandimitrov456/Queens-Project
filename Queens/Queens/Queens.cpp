@@ -13,6 +13,18 @@ int abs(int num)
     return num > 0 ? num : -num;
 }
 
+int myStrCmp(const char* str1, const char* str2)
+{
+    if (str1 == nullptr || str2 == nullptr)
+        return 0;
+    while (*str1 && *str2 && *str1 == *str2)
+    {
+        str1++;
+        str2++;
+    }
+    return *str1 - *str2;
+}
+
 bool isValidQueen(const Queen queens[], int x, int y, int& queenCount, int cols, int rows)
 {
     if (x<0 || x>cols || y<0 || y>rows)
@@ -24,6 +36,21 @@ bool isValidQueen(const Queen queens[], int x, int y, int& queenCount, int cols,
         if (queens[i].x == x)return false;
         if (queens[i].y == y)return false;
         if (abs(queens[i].x - x) == abs(queens[i].y - y)) return false;
+    }
+    return true;
+}
+
+bool isWin(const Queen queens[], int& queenCount, int cols, int rows)
+{
+    if (queenCount == 0)
+        return false;
+    for (int i = 0;i < rows;i++)
+    {
+        for (int j = 0;j < cols;j++)
+        {
+            if (isValidQueen(queens, j, i, queenCount, cols, rows))
+                return false;
+        }
     }
     return true;
 }
@@ -92,18 +119,68 @@ void free(const Queen queens[], int cols, int rows, int queenCount)
     }
 }
 
+void back(int& queenCount)
+{
+    queenCount--;
+}
+
 int main()
 {
-
     Queen queens[MAX_SIZE];   //n-cols
     int cols, rows;           //m-rows
-    std::cin >> cols >> rows;
-    int minimal = cols < rows ? cols : rows;
-    int queenCount = 0;
-    while (queenCount < minimal)
+    char command[128];
+    while (true)
     {
-        addQueen(queens, cols, rows, queenCount);
-        free(queens, cols, rows, queenCount);
-        //show(queens, cols, rows, queenCount);
+        std::cin >> command;
+        if (myStrCmp(command, "new") == 0)
+        {
+            std::cin >> cols >> rows;
+            //int minimal = cols < rows ? cols : rows;
+            int queenCount = 0;
+            bool cancel = false;
+            while (!isWin(queens, queenCount, cols, rows))
+            {
+                std::cin >> command;
+                if (myStrCmp(command, "play") == 0)
+                {
+                    addQueen(queens, cols, rows, queenCount);
+                }
+                else if (myStrCmp(command, "free") == 0)
+                {
+                    free(queens, cols, rows, queenCount);
+                }
+                else if (myStrCmp(command, "show") == 0)
+                {
+                    show(queens, cols, rows, queenCount);
+                }
+                else if (myStrCmp(command, "back") == 0)
+                {
+                    back(queenCount);
+                }
+                else if (myStrCmp(command, "exit") == 0)
+                {
+                    cancel = true;
+                    break;
+                }
+                else
+                {
+                    std::cout << "Invalid command! Try again!" << std::endl;
+                }
+            }
+            if (!cancel)
+            {
+                std::cout << "Winner is player ";
+                if (queens[queenCount - 1].player)
+                    std::cout << '1' << std::endl;
+                else
+                    std::cout << '2' << std::endl;
+            }
+        }
+        else if (myStrCmp(command, "exit") == 0)
+            break;
+        else
+            std::cout << "Invalid command! Try again!" << std::endl;
     }
+    
+    
 }
