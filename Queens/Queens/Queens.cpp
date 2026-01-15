@@ -2,6 +2,7 @@
 #include <fstream>
 const size_t MAX_SIZE = 15;
 const size_t MAX_COMMAND_SIZE = 128;
+const size_t MAX_FILE_NAME = 1024;
 
 struct Queen
 {
@@ -20,6 +21,44 @@ int myStrCmp(const char* str1, const char* str2)
         str2++;
     }
     return *str1 - *str2;
+}
+
+bool isDigit(char symb)
+{
+    return symb >= '0' && symb <= '9';
+}
+
+bool isPositiveNumber(const char* str)
+{
+    if (!str)
+        return false;
+    while (*str)
+    {
+        if (!isDigit(*str))
+            return false;
+        str++;
+    }
+    return true;
+}
+
+unsigned charToDigit(char symb)
+{
+    return symb-'0';
+}
+
+unsigned stringToNumber(const char* str)
+{
+    if (!str)
+        return 0;
+    unsigned result = 0;
+    while (*str)
+    {
+        int digit = charToDigit(*str);
+        result *= 10;
+        result += digit;
+        str++;
+    }
+    return result;
 }
 
 bool isValidQueen(const Queen queens[], int x, int y, size_t& queenCount, int cols, int rows)
@@ -54,8 +93,19 @@ bool isWin(const Queen queens[], size_t& queenCount, int cols, int rows)
 
 void addQueen(Queen queens[], int cols, int rows, size_t& queenCount)
 {
+    char firstArg[MAX_COMMAND_SIZE], secondArg[MAX_COMMAND_SIZE];
+    std::cin >> firstArg >> secondArg;
     int x, y;
-    std::cin >> x >> y;
+    if (isPositiveNumber(firstArg) && isPositiveNumber(secondArg))
+    {
+        x = stringToNumber(firstArg);
+        y = stringToNumber(secondArg);
+    }
+    else
+    {
+        std::cout << "Invalid arguments" << std::endl;
+        return;
+    }
     if (isValidQueen(queens, x, y, queenCount, cols, rows))
     {
         queens[queenCount].x = x;
@@ -141,13 +191,13 @@ void history(Queen queens[], size_t queenCount)
     }
 }
 
-void save(const Queen queens[], size_t queenCount, int n, int m,const char* filename)
+bool save(const Queen queens[], size_t queenCount, int n, int m,const char* filename)
 {
     std::ofstream file(filename);
     if (!file.is_open())
     {
         std::cout << "Error in saving game"<<std::endl;
-        return;
+        return false;
     }
     file << n << " " << m << std::endl;
     for (int i = 0;i < queenCount;i++)
@@ -155,15 +205,17 @@ void save(const Queen queens[], size_t queenCount, int n, int m,const char* file
         file << queens[i].x << " " << queens[i].y << " " << queens[i].player << std::endl;
     }
     file.close();
+    return true;
 }
 
-void load(Queen queens[], size_t& queenCount, int& n, int& m, const char* filename)
+bool load(Queen queens[], size_t& queenCount, int& n, int& m, const char* filename)
 {
+    queenCount = 0;
     std::ifstream file(filename);
     if (!file.is_open())
     {
-        std::cout << "Error inloading game" << std::endl;
-        return;
+        std::cout << "Error in loading game" << std::endl;
+        return false;
     }
     file >> n >> m;
     while (!file.eof())
@@ -173,20 +225,21 @@ void load(Queen queens[], size_t& queenCount, int& n, int& m, const char* filena
     }
     queenCount--;
     file.close();
+    return true;
 }
 
-void helpBeforeGame()
+void mainMenu()
 {
-    std::cout << "Commands available before the start of a game:" << std::endl;
+    std::cout << "Main menu:" << std::endl;
     std::cout << "new N M           --->    new game with NxM board" << std::endl;
     std::cout << "load file.txt     --->    load a game" << std::endl;
     std::cout << "help              --->    show this menu again" << std::endl;
     std::cout << "exit              --->    exit app" << std::endl << std::endl;
 }
 
-void helpDuringGame()
+void gameMenu()
 {
-    std::cout << "Commands available during a game:" << std::endl;
+    std::cout << "Game menu:" << std::endl;
     std::cout << "play x y          --->    place a queen on position (x,y)" << std::endl;
     std::cout << "show              --->    show the board" << std::endl;
     std::cout << "free              --->    show free spaces on the board" << std::endl;
@@ -213,12 +266,15 @@ bool processCommand(Queen queens[], size_t& queenCount, int cols, int rows,const
     else if (myStrCmp(command, "history") == 0)
         history(queens, queenCount);
     else if (myStrCmp(command, "exit") == 0)
+    {
+        mainMenu();
         return false;
+    }
     else if (myStrCmp(command, "help") == 0)
-        helpDuringGame();
+        gameMenu();
     else if (myStrCmp(command, "save") == 0)
     {
-        char filename[1024];
+        char filename[MAX_FILE_NAME];
         std::cin >> filename;
         save(queens, queenCount, cols, rows, filename);
     }
@@ -229,6 +285,7 @@ bool processCommand(Queen queens[], size_t& queenCount, int cols, int rows,const
 
 void runGame(Queen queens[],size_t& queenCount,int cols, int rows)
 {
+    gameMenu();
     char command[MAX_COMMAND_SIZE];
     bool reachedEnd = true;
     while (reachedEnd&&!isWin(queens, queenCount, cols, rows))
@@ -242,13 +299,14 @@ void runGame(Queen queens[],size_t& queenCount,int cols, int rows)
         if (queens[queenCount - 1].player)
             std::cout << '1' << std::endl;
         else
-            std::cout << '2' << std::endl;
+            std::cout << '2' << std::endl << std::endl;
+        mainMenu();
     }
 }
 
 int main()
 {
-    helpBeforeGame();
+    mainMenu();
     Queen queens[MAX_SIZE];   //n-cols
     int cols, rows;           //m-rows
     char command[MAX_COMMAND_SIZE];
@@ -258,22 +316,41 @@ int main()
         std::cin >> command;
         if (myStrCmp(command, "new") == 0)
         {
-            std::cin >> cols >> rows;
-            bool cancel = false;
-            std::cout << "Game started!" << std::endl;
-            helpDuringGame();
-            runGame(queens, queenCount, cols, rows);
+            char firstArg[MAX_COMMAND_SIZE], secondArg[MAX_COMMAND_SIZE];
+            std::cin >> firstArg >> secondArg;
+            if (isPositiveNumber(firstArg) && isPositiveNumber(secondArg))
+            {
+                cols = stringToNumber(firstArg);
+                rows = stringToNumber(secondArg);
+                if (cols > 0 && cols <= 15 && rows > 0 && rows <= 15)
+                {
+                    std::cout << "Game started!" << std::endl;
+                    runGame(queens, queenCount, cols, rows);
+                }
+                else
+                {
+                    std::cout << "Invalid arguments!" << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "Invalid arguments!" << std::endl;
+            }
+            
         }
         else if (myStrCmp(command, "load") == 0)
         {
-            char filename[1024];
+            char filename[MAX_FILE_NAME];
             std::cin >> filename;
-            load(queens, queenCount, cols, rows,filename);
-            runGame(queens, queenCount, cols, rows);
+            if (load(queens, queenCount, cols, rows, filename))
+            {
+                std::cout << "Game loaded!" << std::endl;
+                runGame(queens, queenCount, cols, rows);
+            }
         }
         else if (myStrCmp(command, "help") == 0)
         {
-            helpBeforeGame();
+            mainMenu();
         }
         else if (myStrCmp(command, "exit") == 0)
             break;
