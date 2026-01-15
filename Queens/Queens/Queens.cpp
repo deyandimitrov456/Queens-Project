@@ -59,7 +59,6 @@ void addQueen(Queen queens[], int cols, int rows, int& queenCount)
 {
     int x, y;
     std::cin >> x >> y;
-    //std::cout << "Invalid queen";
     if (isValidQueen(queens, x, y, queenCount, cols, rows))
     {
         queens[queenCount].x = x;
@@ -134,12 +133,24 @@ void turn(int& queenCount)
         std::cout << "Its P2's turn." << std::endl;
 }
 
+void history(Queen queens[], size_t queenCount)
+{
+    for (int i = 0;i < queenCount; i++)
+    {
+        if (queens[i].player)
+            std::cout << "P1 -> x=" << queens[i].x << " y=" << queens[i].y << std::endl;
+        else
+            std::cout << "P2 -> x=" << queens[i].x << " y=" << queens[i].y << std::endl;
+    }
+}
+
 void helpBeforeGame()
 {
     std::cout << "Commands available before the start of a game:" << std::endl;
     std::cout << "new N M           --->    new game with NxM board" << std::endl;
     std::cout << "load file.txt     --->    load a game" << std::endl;
-    std::cout << "help              --->    show this menu again" << std::endl << std::endl;
+    std::cout << "help              --->    show this menu again" << std::endl;
+    std::cout << "exit              --->    exit app" << std::endl << std::endl;
 }
 
 void helpDuringGame()
@@ -150,9 +161,10 @@ void helpDuringGame()
     std::cout << "free              --->    show free spaces on the board" << std::endl;
     std::cout << "back              --->    undo last move" << std::endl;
     std::cout << "turn              --->    show whose turn it is" << std::endl;
+    std::cout << "history           --->    history of moves" << std::endl;
     std::cout << "help              --->    show this menu again" << std::endl;
     std::cout << "save file.txt     --->    save current game" << std::endl;
-    std::cout << "exit              --->    exit current game without saving" << std::endl;
+    std::cout << "exit              --->    exit to menu without saving" << std::endl<<std::endl;
 }
 
 int main()
@@ -167,7 +179,6 @@ int main()
         if (myStrCmp(command, "new") == 0)
         {
             std::cin >> cols >> rows;
-            //int minimal = cols < rows ? cols : rows;
             int queenCount = 0;
             bool cancel = false;
             std::cout << "Game started!" << std::endl;
@@ -194,6 +205,10 @@ int main()
                 else if (myStrCmp(command, "turn")==0)
                 {
                     turn(queenCount);
+                }
+                else if (myStrCmp(command, "history")==0)
+                {
+                    history(queens,queenCount);
                 }
                 else if (myStrCmp(command, "exit") == 0)
                 {
