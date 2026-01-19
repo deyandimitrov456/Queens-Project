@@ -1,3 +1,19 @@
+/**
+*
+* Solution to course project # 6
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2025/2026
+*
+* @author Deyan Dimitrov
+* @idnumber 4MI0600644
+* @compiler VC
+*
+* <file with queens game>
+*
+*/
+
+
 #include <iostream>
 #include <fstream>
 const size_t MAX_SIZE = 15;
